@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dinâmica - Grupo 6</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+
+        /* PALETA DE CORES BASEADA NO SEU SLIDE */
+        :root {
+            --slide-bg: #FDFBF5; /* Fundo creme */
+            --text-main: #2C3E2D; /* Verde escuro */
+            --text-muted: #5C6E5D; /* Verde acinzentado */
+            --pantera-color: #D48C70; /* Terracota */
+            --polvo-color: #8DA075; /* Verde oliva */
+            --card-bg: #FFFFFF; /* Branco */
+            --correct-color: #558B2F; /* Verde folha forte */
+            --wrong-color: #C62828; /* Vermelho escuro */
+            --border-light: #E8E5DA;
+            --gold-alert: #F59E0B; /* Cor de destaque para o alerta 2X */
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #D6D3C4;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        /* --- O SLIDE --- */
+        .slide-container {
+            background-color: var(--slide-bg);
+            width: 100%;
+            max-width: 1100px;
+            aspect-ratio: 16 / 9;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        /* DECORAÇÕES BOTÂNICAS */
+        .decor-blob-1 { position: absolute; top: -50px; left: -50px; width: 300px; opacity: 0.2; z-index: -1; fill: var(--polvo-color); }
+        .decor-blob-2 { position: absolute; bottom: -80px; right: -50px; width: 400px; opacity: 0.15; z-index: -1; fill: var(--pantera-color); }
+        .decor-image { position: absolute; bottom: 0; left: 0; width: 250px; opacity: 0.8; z-index: -1; mix-blend-mode: multiply; pointer-events: none; }
+
+        /* --- CABEÇALHO --- */
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            border-bottom: 2px solid var(--border-light);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 2;
+        }
+        .slide-header h2 { margin: 0; font-size: 1.2em; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--text-main); }
+        .slide-header span { color: var(--pantera-color); font-weight: 600; }
+
+        /* --- CONTEÚDO --- */
+        .slide-content { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; z-index: 2; }
+        .slide-footer { padding: 15px 40px; font-size: 0.85em; color: var(--text-muted); display: flex; justify-content: space-between; background: rgba(255, 255, 255, 0.7); border-top: 1px solid var(--border-light); z-index: 2; }
+
+        /* --- SETUP DA DINÂMICA --- */
+        .setup-layout { display: flex; gap: 40px; align-items: center; justify-content: center; height: 100%; }
+        .setup-info { flex: 1; text-align: left; }
+        .setup-image { flex: 1; height: 100%; background-image: url('https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'); background-size: cover; background-position: center; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+
+        .title-huge { font-size: 3.2em; margin: 0 0 10px 0; color: var(--text-main); font-weight: 800; line-height: 1.1; }
+        .subtitle { font-size: 1.2em; color: var(--text-muted); margin-bottom: 30px; }
+        
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 15px; font-size: 1.1em; border-radius: 12px; border: 2px solid var(--border-light); background: rgba(255,255,255,0.9); color: var(--text-main); font-family: inherit; outline: none; }
+        input:focus { border-color: var(--polvo-color); }
+        
+        .btn-add { background: var(--polvo-color); color: white; border: none; padding: 0 25px; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 1.1em; transition: 0.3s; }
+        .btn-add:hover { filter: brightness(0.9); }
+
+        .teams-badge-container { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; max-height: 120px; overflow-y: auto; }
+        .team-badge { background: var(--card-bg); border: 2px solid var(--border-light); padding: 8px 15px; border-radius: 20px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .team-badge span { color: var(--wrong-color); cursor: pointer; font-weight: bold; font-size: 1.2em; }
+
+        .btn-start { background: var(--pantera-color); color: white; border: none; padding: 18px 40px; font-size: 1.2em; font-weight: 800; border-radius: 50px; cursor: pointer; text-transform: uppercase; transition: 0.3s; width: 100%; }
+        .btn-start:hover { transform: scale(1.02); box-shadow: 0 10px 20px rgba(212, 140, 112, 0.3); }
+
+        /* --- QUIZ ECRÃ --- */
+        #quiz-screen { display: none; height: 100%; }
+        
+        .scoreboard { display: flex; justify-content: center; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; }
+        .score-card { background: var(--card-bg); padding: 8px 20px; border-radius: 12px; text-align: center; border: 1px solid var(--border-light); border-bottom: 3px solid var(--polvo-color); }
+        .score-card .points { display: block; font-size: 1.4em; font-weight: 800; color: var(--text-main); }
+
+        /* AVISO DE PONTO DUPLO */
+        .alert-double-points {
+            display: none;
+            background: rgba(245, 158, 11, 0.15);
+            border: 2px solid var(--gold-alert);
+            color: #B45309;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 1.1em;
+            text-align: center;
+            margin: 0 auto 20px auto;
+            width: fit-content;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        .question-text { font-size: 1.5em; font-weight: 600; margin-bottom: 25px; text-align: center; color: var(--text-main); line-height: 1.3; }
+
+        .layout-split { display: flex; gap: 30px; height: 100%; }
+        .options-column { flex: 1; display: flex; flex-direction: column; gap: 15px; }
+        
+        .option-box { background: var(--card-bg); border: 2px solid var(--border-light); padding: 15px 20px; border-radius: 16px; font-size: 1.1em; display: flex; align-items: center; transition: 0.3s; }
+        .opt-letter { background: var(--slide-bg); border: 2px solid var(--border-light); width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 800; margin-right: 15px; flex-shrink: 0; }
+        
+        .correct-opt { background: #F1F8E9 !important; border-color: var(--correct-color) !important; }
+        .correct-opt .opt-letter { background: var(--correct-color); color: white; border-color: var(--correct-color); }
+        .wrong-opt { opacity: 0.4; }
+
+        .teams-column { width: 320px; background: rgba(255,255,255,0.9); padding: 20px; border-radius: 16px; border: 1px solid var(--border-light); box-shadow: 0 10px 20px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
+        .teams-column h3 { margin-top: 0; font-size: 1em; color: var(--text-muted); text-transform: uppercase; text-align: center; }
+        
+        #team-controls { flex: 1; overflow-y: auto; max-height: 250px; padding-right: 5px; }
+        .team-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: var(--slide-bg); padding: 10px; border-radius: 10px; }
+        .team-row-name { font-weight: 600; font-size: 1em; color: var(--text-main); width: 80px; overflow: hidden; text-overflow: ellipsis; }
+        .letter-btn { background: white; color: var(--text-muted); border: 2px solid var(--border-light); width: 32px; height: 32px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .letter-btn:hover { border-color: var(--polvo-color); color: var(--polvo-color); }
+        .letter-btn.selected { background: var(--pantera-color); border-color: var(--pantera-color); color: white; }
+        .letter-btn:disabled { cursor: not-allowed; opacity: 0.5; }
+        
+        .result-status { font-weight: bold; font-size: 0.9em; text-align: right; width: 60px; }
+
+        .btn-reveal { width: 100%; padding: 15px; background: var(--polvo-color); color: white; border: none; font-size: 1.1em; font-weight: bold; border-radius: 12px; margin-top: 15px; cursor: pointer; }
+        .btn-next { width: 100%; padding: 15px; background: var(--pantera-color); color: white; border: none; font-size: 1.1em; font-weight: bold; border-radius: 12px; margin-top: 15px; cursor: pointer; display: none; }
+
+        /* --- RESULTADOS --- */
+        #result-screen { display: none; text-align: center; }
+        .podium { display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 20px; max-height: 300px; overflow-y: auto; width: 100%; }
+        .podium-item { background: var(--card-bg); border: 2px solid var(--border-light); padding: 15px 30px; border-radius: 16px; font-size: 1.3em; font-weight: 800; width: 60%; display: flex; justify-content: space-between; }
+        .podium-1 { border-color: var(--polvo-color); color: var(--polvo-color); transform: scale(1.05); background: #F8FAF5; margin-bottom: 10px;}
+    </style>
+</head>
+<body>
+
+    <div class="slide-container">
+        
+        <svg class="decor-blob-1" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <path d="M44.7,-76.4C58.8,-69.2,71.8,-59.1,81.4,-46.3C91,-33.5,97.3,-18,97.2,-2.6C97.1,12.8,90.6,28,80.7,40.6C70.8,53.2,57.5,63.1,43,70.5C28.5,77.9,12.8,82.8,-2.6,87.1C-18,91.4,-35.5,95.1,-49.6,88.4C-63.7,81.7,-74.4,64.6,-82.3,47.8C-90.2,31,-95.3,14.5,-94.1,-1.5C-92.9,-17.5,-85.4,-33,-75,-45.5C-64.6,-58,-51.3,-67.5,-37.2,-74.6C-23.1,-81.7,-8.2,-86.4,3.7,-92.4C15.6,-98.4,26.4,-99.8,44.7,-76.4Z" transform="translate(100 100)" />
+        </svg>
+        <svg class="decor-blob-2" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <path d="M42.7,-73.4C55.9,-65.4,67.6,-54.1,76.5,-40.5C85.4,-26.9,91.5,-11,90.8,4.5C90.1,20,82.6,35.1,72.2,47.2C61.8,59.3,48.5,68.4,34.1,73.6C19.7,78.8,4.2,80.1,-10.8,78.2C-25.8,76.3,-40.3,71.2,-53.1,62.1C-65.9,53,-77,39.9,-83.1,24.8C-89.2,9.7,-90.3,-7.4,-84.9,-22.4C-79.5,-37.4,-67.6,-50.3,-53.9,-58.5C-40.2,-66.7,-24.7,-70.2,-9.5,-73.9C5.7,-77.6,29.5,-81.4,42.7,-73.4Z" transform="translate(100 100)" />
+        </svg>
+        <img src="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Decor" class="decor-image" style="mix-blend-mode: color-burn; opacity: 0.15; border-radius: 0 100% 0 0;">
+
+        <div class="slide-header">
+            <h2>Sistema Respiratório</h2>
+            <span>Dinâmica Interativa</span>
+        </div>
+
+        <div class="slide-content" id="setup-screen">
+            <div class="setup-layout">
+                <div class="setup-info">
+                    <h1 class="title-huge">O Desafio<br>do Fôlego</h1>
+                    <p class="subtitle">Vertebrados x Invertebrados • Adicione as equipas para começar.</p>
+                    
+                    <div class="input-group">
+                        <input type="text" id="team-input" placeholder="Nome da Equipa (Ex: Alvéolos)">
+                        <button class="btn-add" onclick="addTeam()">Adicionar</button>
+                    </div>
+
+                    <div class="teams-badge-container" id="teams-list"></div>
+
+                    <button class="btn-start" id="btn-start" style="display: none;" onclick="startPresentation()">Iniciar Dinâmica</button>
+                </div>
+                <div class="setup-image"></div>
+            </div>
+        </div>
+
+        <div class="slide-content" id="quiz-screen">
+            <div class="scoreboard" id="scoreboard"></div>
+            
+            <div class="alert-double-points" id="alert-double">
+                ⚡ ATENÇÃO! PERGUNTA DIFÍCIL: VALE A DOBRAR (2 PONTOS) ⚡
+            </div>
+
+            <div class="question-text" id="q-text">Texto da Pergunta</div>
+
+            <div class="layout-split">
+                <div class="options-column" id="options-container"></div>
+                
+                <div class="teams-column">
+                    <h3>Painel de Respostas</h3>
+                    <div id="team-controls"></div>
+                    
+                    <button class="btn-reveal" id="btn-reveal" onclick="revealAnswer()">Verificar Respostas</button>
+                    <button class="btn-next" id="btn-next" onclick="nextSlide()">Próxima Pergunta ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide-content" id="result-screen">
+            <h1 class="title-huge">Fim da Apresentação!</h1>
+            <p class="subtitle">Classificação final das equipas.</p>
+            
+            <div class="podium" id="podium-list"></div>
+            
+            <button class="btn-start" style="margin-top: 30px; width: auto;" onclick="location.reload()">Encerrar Dinâmica</button>
+        </div>
+
+        <div class="slide-footer">
+            <div><strong>BIOLOGIA</strong> • Turma</div>
+            <div>Apresentação: <strong>GRUPO 6</strong></div>
+        </div>
+
+    </div>
+
+    <script>
+        // 12 Perguntas intercalando normais (1 pt) e difíceis (2 pts)
+        const slideData = [
+            { q: "Qual o músculo principal que se contrai e relaxa para movimentar o ar nos pulmões?", options: ["Sifão", "Diafragma", "Manto"], correct: 1, points: 1 },
+            { q: "A hematose é o processo vital onde ocorre a troca gasosa. Onde ocorre na Pantera?", options: ["Nas Brânquias", "Na Traqueia", "Nos Alvéolos"], correct: 2, points: 1 },
+            { q: "O polvo possui sangue de coloração azulada. Qual o pigmento responsável por isso?", options: ["Hemoglobina", "Hemocianina", "Melanina"], correct: 1, points: 1 },
+            { q: "O que permite que o oxigénio e o dióxido de carbono atravessem as finas paredes dos alvéolos e capilares sanguíneos?", options: ["Transporte ativo (gasto de ATP)", "Diferença de pressão parcial (Difusão)", "Osmose simples"], correct: 1, points: 2 },
+            { q: "Para bombear o sangue até às brânquias e por todo o corpo, quantos corações o polvo possui?", options: ["1 coração", "2 corações", "3 corações"], correct: 2, points: 1 },
+            { q: "Muitos anfíbios utilizam a respiração cutânea. Para que esta seja eficiente, como deve ser a sua pele?", options: ["Seca e muito queratinizada", "Fina, húmida e altamente vascularizada", "Grossa e rica em glândulas de veneno"], correct: 1, points: 2 },
+            { q: "No sistema traqueal dos insetos, como o oxigénio chega às células?", options: ["Pelo sistema circulatório", "Diretamente pelas traqueias", "Através da pele húmida"], correct: 1, points: 1 },
+            { q: "As aves possuem o sistema respiratório mais eficiente entre os vertebrados terrestres devido à presença de:", options: ["Parabrônquios e sacos aéreos", "Pulmões gigantes e sem brônquios", "Múltiplos diafragmas"], correct: 0, points: 2 },
+            { q: "As brânquias dos peixes ósseos são protegidas por uma placa óssea móvel que ajuda no fluxo de água. Qual o seu nome?", options: ["Opérculo", "Espiráculo", "Sifão exalante"], correct: 0, points: 1 },
+            { q: "Qual é a grande vantagem adaptativa da hemocianina (à base de cobre) para o polvo?", options: ["Funciona muito bem em águas marinhas frias e com baixo nível de oxigénio", "Evita que o polvo perca água para o ambiente através da osmose", "Torna o sangue mais leve, facilitando a natação"], correct: 0, points: 2 },
+            { q: "Qual a principal diferença na adaptação respiratória entre a Pantera e o Polvo?", options: ["Ambos usam difusão no ar", "Pantera usa pulmões (ar) e Polvo usa brânquias (água)", "Polvo usa pulmões (água) e Pantera usa brânquias (ar)"], correct: 1, points: 1 },
+            { q: "O mecanismo fisiológico que maximiza a captação de oxigénio nas brânquias dos peixes chama-se:", options: ["Bombeamento diafragmático", "Respiração de pressão positiva", "Sistema de fluxo em contracorrente"], correct: 2, points: 2 }
+        ];
+
+        const letters = ['A', 'B', 'C'];
+        let teams = [];
+        let currentSlide = 0;
+        let choices = {};
+
+        document.getElementById('team-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addTeam();
+            }
+        });
+
+        function addTeam() {
+            const input = document.getElementById('team-input');
+            const name = input.value.trim();
+            if (name && !teams.find(t => t.name === name)) {
+                teams.push({ name: name, score: 0 });
+                input.value = '';
+                updateTeamsUI();
+            }
+        }
+
+        function updateTeamsUI() {
+            document.getElementById('teams-list').innerHTML = teams.map((t, i) => `
+                <div class="team-badge">${t.name} <span onclick="removeTeam(${i})">×</span></div>
+            `).join('');
+            document.getElementById('btn-start').style.display = teams.length >= 2 ? 'block' : 'none';
+        }
+
+        function removeTeam(i) {
+            teams.splice(i, 1);
+            updateTeamsUI();
+        }
+
+        function startPresentation() {
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('quiz-screen').style.display = 'flex';
+            loadSlide();
+        }
+
+        function updateScoreboard() {
+            document.getElementById('scoreboard').innerHTML = teams.map(t => `
+                <div class="score-card">
+                    <span style="font-size: 0.8em; text-transform: uppercase; color: var(--text-muted);">${t.name}</span>
+                    <span class="points">${t.score}</span>
+                </div>
+            `).join('');
+        }
+
+        function loadSlide() {
+            choices = {};
+            document.getElementById('btn-reveal').style.display = 'block';
+            document.getElementById('btn-next').style.display = 'none';
+            updateScoreboard();
+            
+            const q = slideData[currentSlide];
+            
+            // Verifica e exibe alerta de ponto duplo
+            if(q.points === 2) {
+                document.getElementById('alert-double').style.display = 'block';
+            } else {
+                document.getElementById('alert-double').style.display = 'none';
+            }
+
+            document.getElementById('q-text').innerText = `${currentSlide + 1}. ${q.q}`;
+
+            // Botões de leitura
+            document.getElementById('options-container').innerHTML = q.options.map((opt, i) => `
+                <div class="option-box" id="opt-${i}">
+                    <div class="opt-letter">${letters[i]}</div> ${opt}
+                </div>
+            `).join('');
+
+            // Painel das equipas para registar respostas
+            document.getElementById('team-controls').innerHTML = teams.map((t, tIndex) => `
+                <div class="team-row">
+                    <span class="team-row-name" title="${t.name}">${t.name}</span>
+                    <div style="display:flex; gap: 5px;">
+                        ${letters.map((L, i) => `
+                            <button class="letter-btn" id="t${tIndex}-btn${i}" onclick="lockAnswer(${tIndex}, ${i})">${L}</button>
+                        `).join('')}
+                    </div>
+                    <span class="result-status" id="res-${tIndex}">...</span>
+                </div>
+            `).join('');
+        }
+
+        function lockAnswer(teamIdx, optIdx) {
+            choices[teamIdx] = optIdx;
+            letters.forEach((_, i) => document.getElementById(`t${teamIdx}-btn${i}`).classList.remove('selected'));
+            document.getElementById(`t${teamIdx}-btn${optIdx}`).classList.add('selected');
+            document.getElementById(`res-${teamIdx}`).innerText = 'OK!';
+            document.getElementById(`res-${teamIdx}`).style.color = 'var(--polvo-color)';
+        }
+
+        function revealAnswer() {
+            if (Object.keys(choices).length < teams.length) {
+                alert("Atenção: Por favor, registe a resposta de TODAS as equipas antes de revelar!");
+                return;
+            }
+
+            const q = slideData[currentSlide];
+            const correct = q.correct;
+
+            // Ilumina a certa e apaga as erradas na ecrã
+            q.options.forEach((_, i) => {
+                const box = document.getElementById(`opt-${i}`);
+                if (i === correct) box.classList.add('correct-opt');
+                else box.classList.add('wrong-opt');
+            });
+
+            // Distribui os pontos baseados no peso da pergunta (1 ou 2)
+            teams.forEach((t, i) => {
+                const resultBox = document.getElementById(`res-${i}`);
+                if (choices[i] === correct) {
+                    t.score += q.points;
+                    resultBox.innerText = `+${q.points} Pts`;
+                    resultBox.style.color = 'var(--correct-color)';
+                } else {
+                    resultBox.innerText = 'Errou';
+                    resultBox.style.color = 'var(--wrong-color)';
+                }
+                
+                // Desativa os botões
+                letters.forEach((_, btnIdx) => document.getElementById(`t${i}-btn${btnIdx}`).disabled = true);
+            });
+
+            updateScoreboard();
+            document.getElementById('btn-reveal').style.display = 'none';
+            document.getElementById('btn-next').style.display = 'block';
+        }
+
+        function nextSlide() {
+            currentSlide++;
+            if (currentSlide < slideData.length) loadSlide();
+            else showResults();
+        }
+
+        function showResults() {
+            document.getElementById('quiz-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'flex';
+            
+            const sorted = [...teams].sort((a, b) => b.score - a.score);
+            document.getElementById('podium-list').innerHTML = sorted.map((t, i) => `
+                <div class="podium-item ${i === 0 ? 'podium-1' : ''}">
+                    <span>${i + 1}º Lugar ${i === 0 ? '🌿' : ''} - ${t.name}</span>
+                    <span>${t.score} pts</span>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
